@@ -1,49 +1,44 @@
 # FlowTask — Team Task Manager
 
-A full-stack web app where teams can create projects, assign tasks, and track progress with role-based access control (Admin / Member).
+> A full-stack project management app with role-based access, real-time task tracking, and drag-and-drop task board.
+
+**Live App** → [flowtask-jade.vercel.app](https://flowtask-jade.vercel.app)  
+**Backend API** → [flowtask-production.up.railway.app](https://flowtask-production.up.railway.app)  
+**GitHub** → [github.com/VYASMITTAL07/flowtask](https://github.com/VYASMITTAL07/flowtask)
 
 ---
 
-## Live Demo
+## What I Built
 
-> Deployed on Railway - https://flowtask-production.up.railway.app
-> 
-> Live at Vercel - https://flowtask-jade.vercel.app
+FlowTask is a full-stack web application that lets teams create projects, assign tasks to members, and track work from creation to completion. I built it to practice full-stack development — connecting a real Node.js + Express backend to a MongoDB database, with JWT authentication and role-based access control.
+
+The frontend is a single-page app written in plain HTML, CSS, and JavaScript — no React, no framework — which helped me understand how SPAs actually work under the hood.
 
 ---
 
 ## Features
 
-- **Auth** — Signup / Login with JWT. Passwords hashed with bcrypt.
-- **Role-based access** — Admins can manage members, delete any task/project. Members have limited access.
-- **Projects** — Create and manage multiple projects. Add team members to projects.
-- **Tasks** — Create tasks with title, description, priority (low/medium/high), due date, status, and assignee.
-- **Task Board** — Drag-and-drop tasks across status columns (To Do → In Progress → Review → Done).
-- **Dashboard** — Stats overview, weekly chart, recent activity feed.
-- **Team** — View all workspace members, their roles and task counts.
-- **Search** — Global search across tasks.
-- **Overdue detection** — Tasks past due date are flagged automatically.
+- **JWT Authentication** — Signup and login with tokens stored client-side. Passwords hashed with bcrypt before hitting the database.
+- **Role-based access (Admin / Member)** — Admins can create projects, invite members, and delete any task. Members can only work within projects they're assigned to.
+- **Projects** — Create projects, track progress automatically based on task completion percentage.
+- **Tasks** — Full CRUD with priority levels (high/medium/low), due dates, assignee, and status.
+- **Drag-and-drop Task Board** — Move tasks across columns: To Do → In Progress → Review → Done. Status updates hit the real API on drop.
+- **Dashboard** — Live stats (total, done, in-progress, overdue), weekly activity chart, recent task feed.
+- **Team view** — See all workspace members, their roles, and how many tasks they've completed.
+- **Overdue detection** — Tasks past their due date are automatically flagged in red.
+- **Global search** — Filter tasks by title in real time.
 
 ---
 
 ## Tech Stack
 
-### Backend
-| Layer | Technology |
-|-------|-----------|
-| Runtime | Node.js |
-| Framework | Express.js |
+| Layer | Tech |
+|---|---|
+| Frontend | HTML5, CSS3, Vanilla JavaScript |
+| Backend | Node.js, Express.js |
 | Database | MongoDB + Mongoose |
 | Auth | JWT + bcryptjs |
-| Env config | dotenv |
-
-### Frontend
-| Layer | Technology |
-|-------|-----------|
-| Structure | HTML5 |
-| Styling | CSS3 (custom, no framework) |
-| Logic | Vanilla JavaScript |
-| Fonts | Syne + DM Sans (Google Fonts) |
+| Deployment | Vercel (frontend), Railway (backend + MongoDB) |
 
 ---
 
@@ -51,129 +46,66 @@ A full-stack web app where teams can create projects, assign tasks, and track pr
 
 ```
 flowtask/
-├── backend/
-│   ├── server.js             # Express app entry
-│   ├── .env.example          # Environment variables template
-│   ├── package.json
-│   ├── models/
-│   │   ├── User.js           # User schema (name, email, password, role)
-│   │   ├── Project.js        # Project schema (name, members, owner)
-│   │   └── Task.js           # Task schema (title, status, priority, assignee)
-│   ├── routes/
-│   │   ├── auth.js           # POST /signup, POST /login, GET /me
-│   │   ├── tasks.js          # Full CRUD for tasks
-│   │   ├── projects.js       # Full CRUD for projects + member management
-│   │   └── users.js          # User management
-│   └── middleware/
-│       └── auth.js           # JWT protect + adminOnly middleware
+├── server.js              # Express entry point
+├── package.json
+├── .env.example
+├── models/
+│   ├── User.js            # User schema — name, email, hashed password, role
+│   ├── Project.js         # Project schema — owner, members[], status
+│   └── Task.js            # Task schema — title, priority, status, assignee, dueDate
+├── routes/
+│   ├── auth.js            # POST /signup  POST /login  GET /me
+│   ├── tasks.js           # GET POST PATCH DELETE /tasks
+│   ├── projects.js        # GET POST PATCH DELETE /projects + member add
+│   └── users.js           # GET PATCH DELETE /users
+├── middleware/
+│   └── auth.js            # JWT protect middleware + adminOnly guard
 └── frontend/
-    ├── index.html            # Main app (SPA)
-    ├── package.json
-    └── assets/
-        └── js/
-            └── api.js        # API service layer (fetch wrappers)
+    └── index.html         # Full SPA — auth, dashboard, tasks, board, team
 ```
 
 ---
 
-## REST API Endpoints
+## REST API
 
-### Auth
 ```
-POST   /api/auth/signup      Create account
-POST   /api/auth/login       Login
-GET    /api/auth/me          Get current user (protected)
-```
+POST   /api/auth/signup          Register new user
+POST   /api/auth/login           Login → returns JWT
+GET    /api/auth/me              Get logged-in user (protected)
 
-### Tasks
-```
-GET    /api/tasks            Get all tasks (with filters)
-GET    /api/tasks/:id        Get single task
-POST   /api/tasks            Create task
-PATCH  /api/tasks/:id        Update task
-DELETE /api/tasks/:id        Delete task
-```
+GET    /api/tasks                All tasks for user's projects (filterable)
+POST   /api/tasks                Create task
+PATCH  /api/tasks/:id            Update status, priority, assignee
+DELETE /api/tasks/:id            Delete (creator or admin only)
 
-### Projects
-```
-GET    /api/projects           Get all user's projects
-GET    /api/projects/:id       Get single project
-POST   /api/projects           Create project
-PATCH  /api/projects/:id       Update project
-POST   /api/projects/:id/members  Add member
-DELETE /api/projects/:id       Delete project + tasks
-```
+GET    /api/projects             All projects user belongs to
+POST   /api/projects             Create project
+PATCH  /api/projects/:id         Update project details
+POST   /api/projects/:id/members Add team member to project
+DELETE /api/projects/:id         Delete project + all its tasks
 
-### Users
-```
-GET    /api/users            Get all users
-GET    /api/users/:id        Get user by ID
-PATCH  /api/users/:id        Update profile
-DELETE /api/users/:id        Delete user (admin only)
+GET    /api/users                All workspace users
+PATCH  /api/users/:id            Update own profile
+DELETE /api/users/:id            Admin only
 ```
 
 ---
 
-## Setup & Run Locally
+## Database Schemas
 
-### Prerequisites
-- Node.js v18+
-- MongoDB running locally or a MongoDB Atlas URI
-
-### 1. Clone the repo
-```bash
-git clone https://github.com/yourusername/flowtask.git
-cd flowtask
-```
-
-### 2. Setup backend
-```bash
-cd backend
-npm install
-cp .env.example .env
-# Edit .env — add your MONGO_URI and JWT_SECRET
-npm run dev
-```
-
-### 3. Run frontend
-```bash
-cd ../frontend
-npx serve . -p 3000
-```
-
-Open `http://localhost:3000`
-
----
-
-## Deployment on Railway
-
-1. Push this repo to GitHub
-2. Go to [railway.app](https://railway.app) → New Project → Deploy from GitHub
-3. Add a MongoDB plugin from Railway dashboard
-4. Set environment variables:
-   - `MONGO_URI` → Railway provides this automatically when you add MongoDB
-   - `JWT_SECRET` → any random string
-   - `CLIENT_URL` → your frontend URL
-5. Deploy backend from `/backend` folder
-6. Deploy frontend as a static site from `/frontend` folder
-
----
-
-## Database Schema
-
-### User
+**User**
 ```json
 {
   "name": "string",
-  "email": "string (unique)",
-  "password": "string (hashed)",
+  "email": "string (unique, lowercase)",
+  "password": "string (bcrypt hashed, hidden from responses)",
   "role": "admin | member",
   "phone": "string",
   "bio": "string"
 }
 ```
 
-### Project
+**Project**
 ```json
 {
   "name": "string",
@@ -185,7 +117,7 @@ Open `http://localhost:3000`
 }
 ```
 
-### Task
+**Task**
 ```json
 {
   "title": "string",
@@ -202,8 +134,61 @@ Open `http://localhost:3000`
 
 ---
 
+## Local Setup
+
+### Requirements
+- Node.js v18+
+- MongoDB (local or Atlas)
+
+### Steps
+
+```bash
+# Clone
+git clone https://github.com/VYASMITTAL07/flowtask.git
+cd flowtask
+
+# Install
+npm install
+
+# Environment
+cp .env.example .env
+# Fill in: MONGO_URI, JWT_SECRET, PORT, CLIENT_URL
+
+# Run
+npm run dev
+```
+
+Open `frontend/index.html` in browser or serve it with `npx serve frontend`
+
+---
+
+## Deployment
+
+**Backend → Railway**
+1. Connect GitHub repo to Railway
+2. Add MongoDB plugin → copy the connection string
+3. Set env vars: `MONGO_URI`, `JWT_SECRET`, `CLIENT_URL`
+4. Deploy — Railway auto-detects Node.js
+
+**Frontend → Vercel**
+1. Connect GitHub repo to Vercel
+2. Set root directory to `frontend`
+3. Deploy — no build step needed for plain HTML
+
+---
+
+## Challenges I Faced
+
+- **CORS between Vercel and Railway** — had to configure the Express CORS middleware to accept the Vercel domain specifically
+- **JWT expiry handling** — added token check on every API call, redirects to login if expired
+- **Mongoose population** — tasks reference both User and Project; getting the right fields populated without over-fetching took some iteration
+- **Drag and drop without a library** — built it with native HTML5 drag events, updating task status via PATCH on drop
+
+---
+
 ## Developer
 
 **Vyas Mittal**  
 Email: vyasmittal1206@gmail.com  
-Phone: +91 9027222011
+Phone: +91 9027222011  
+GitHub: [VYASMITTAL07](https://github.com/VYASMITTAL07)
