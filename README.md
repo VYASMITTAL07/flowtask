@@ -4,7 +4,6 @@
 
 **Live App** → [flowtask-jade.vercel.app](https://flowtask-jade.vercel.app)  
 **Backend API** → [flowtask-production.up.railway.app](https://flowtask-production.up.railway.app)  
-**GitHub** → [github.com/VYASMITTAL07/flowtask](https://github.com/VYASMITTAL07/flowtask)
 
 ---
 
